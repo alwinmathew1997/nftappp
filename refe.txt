@@ -1,0 +1,28 @@
+NFT Marketplace
+
+For this assignment you need to create a simple NFT marketplace with Mint, approve and sale functionality. You don’t need to create a fancy UI for this as you will be evaluated by your web3 skills. 
+
+To Do:
+Create a basic form which will take NFT details i.e, Name, type, description, image and preview Image( options). Store this data in IPFS as JSON format. IPFS Metadata example.  You can see in the example images are also stored in IPFS.
+
+ When a user clicks on submit you can use Mint Function from NFT smart contract. Store returned data and IPFS URL in your local storage as we won’t be using the database for tasks.
+
+List all the minted NFT in the same page ( which you stored in local storage ). Again no fancy UI  needed, just a button with token Id should work. When a user clicks on this listed NFT, based on NFT Id you need to call putTokenOnSale function. You can use the Marketplace contract for that. Also before calling this function you might need to approve Token you can use Token contract for that function. 
+
+List of token addresses: 
+
+TOKEN: 0x46785Ba2ADBd4255fdDff60fc4195a027B3Ee3b6
+NFT: 0x9254e4Bc51923A742745aB347AB8c221bE4d55a8
+MARKETPLACE: 0xD5295566Ea12D1ad0f45cE72dB7fD8EA9c55AF64	
+
+Note: These are rinkeby testnet addresses. You can get abi for these from rinkeby etherscan. 
+
+You will also need tokens for approve functionality share your wallet address to neel@solulab.co
+
+How to complete this challenge
+
+Fork this repo, and make your new repo private. Write your code in this repo, and edit this README to include instructions on how to use your script. Feel free to change anything in the repo.
+
+Share the private GitHub link when you're done. Additionally, please give neel@solulab.co access.
+
+Good luck!
