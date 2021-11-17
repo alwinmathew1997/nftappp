@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import logo from "../logo.svg";
 import { Button } from "react-bootstrap";
 import { toast } from "react-toastify";
+import Card from "react-bootstrap/Card";
 
 
 import config from "../lib/config";
@@ -53,6 +54,9 @@ export default function Home() {
   const [Accounts, Set_Accounts] = React.useState('');
   const [UserAccountBal, setUserAccountBal] = React.useState(0);
   const [userNFTS, setuserNFTS] = React.useState([]);
+  const [allnfts, setallnfts] = React.useState([]);
+  const [usernftids, setusernftids] = React.useState([]);
+  const [allnftids, setallnftids] = React.useState([]);
 
   useEffect(() => {
     ConnectWallet()
@@ -139,6 +143,31 @@ export default function Home() {
     return ValidateError;
   }
 
+
+  async function PutOnSale(item){
+    if (window.ethereum) {
+      var web3 = new Web3(window.ethereum);
+      if (typeof window.web3 == 'undefined' || typeof window.web3.eth == 'undefined') {
+        toast.error("Please Connect ", toasterOption)
+      }
+      try {
+       
+        var result = await MarketContract.methods.putTokenOnSale(
+          parseInt(item.tokenid),
+          parseInt(item.Quantity),
+          (parseFloat(item.price)*config.decimalvalues).toString()
+          ).send({
+          from: Accounts
+        })
+
+        console.log("resulsssss",result)
+
+      }
+      catch(err){
+        console.log("errroor",err)
+      }
+    }
+  }
   async function Createitem() {
     var errors = await CreateItemValidation();
     var errorsSize = Object.keys(errors).length;
@@ -178,9 +207,19 @@ export default function Home() {
                 from: Accounts
               })
 
-              console.log("resultresult", result)
               var tokenId = (result && result.events && result.events.Mint
                 && result.events.Mint.returnValues && result.events.Mint.returnValues[0]) ? parseFloat(result.events.Mint.returnValues[0]) : 0
+
+                var alltokendata = localStorage.getItem("AllTokens")
+                if(alltokendata==null){
+                  alltokendata=[]
+                }else{
+                  alltokendata= JSON.parse(alltokendata)
+                }
+
+              alltokendata.push(tokenId)
+              localStorage.setItem("AllTokens", JSON.stringify(alltokendata));
+
 
               var tokendata = localStorage.getItem("TokenDetails");
               if (tokendata == null) { tokendata = {}; } else {
@@ -281,39 +320,104 @@ export default function Home() {
 
   async function GetNFTdata(address) {
     var tokendata = localStorage.getItem("TokenDetails");
-
     if (tokendata != null) {
       tokendata = JSON.parse(tokendata)
+      setusernftids(tokendata)
       var usernfts = tokendata[address]
-      // console.log("usernftsusernfts", usernfts)
-
       var temparra = []
-
-      // var newobj={}
-
       for (var i = 0; i < usernfts.length; i++) {
-        var ipfsurl = await NFTContract.methods.uri(usernfts[0]).call()
 
-        await fetch(ipfsurl)
+
+
+        var tempobj={}
+        var ipfsdata = await NFTContract.methods.getNFTDetails(usernfts[i]).call()
+
+        var tokenid = ipfsdata["nftTokenId"]
+
+        var tokenuri = ipfsdata["tokenURI"]
+
+
+        await fetch(tokenuri)
           .then(async (response) => response.json())
           .then(async data => {
-            temparra.push(data)
+            if(data){
 
+              tempobj.tokenid=tokenid
+              tempobj.price=data.Price
+              tempobj.Image=data.Image
+              tempobj.Name=data.Name
+              tempobj.Description=data.Description
+              tempobj.Royalities=data.Royalities
+              tempobj.Quantity=data.Quantity
+              temparra.push(tempobj)
+
+            }
+            // temparra.push(data)
           });
-
       }
+      setuserNFTS(temparra)
     }
+
+    // var alltokendata = localStorage.getItem("AllTokens")
+
+    // if(alltokendata!=null){
+    //   alltokendata = JSON.parse(alltokendata)
+    //   setallnftids(alltokendata)
+    //   var temparra = []
+    //   for (var i = 0; i < alltokendata.length; i++) {
+    //     var ipfsurl = await NFTContract.methods.getNFTDetails(alltokendata[i]).call()
+
+    //     await fetch(ipfsurl)
+    //       .then(async (response) => response.json())
+    //       .then(async data => {
+    //         temparra.push(data)
+    //       });
+    //   }
+    //   setallnfts(temparra)
+
+    //   console.log("alltokendataalltokendataalltokendata",temparra)
+    // }
   }
 
 
   return (
     <div class="container">
       <div class="row ">
-        <div class="col"></div>
+        {/* <div class="col">
+          <h1>All NFTS</h1>
+
+
+          {allnfts.length>0?(
+            allnfts.map((item,i)=>{
+              return(
+                <div>
+                <Card style={{ width: '11rem' }}>
+              <Card.Img variant="top" src={item.Image} />
+              <Card.Body>
+                <Card.Title>{item.Name}</Card.Title>
+                <Card.Text>
+                  {item.Description}
+                </Card.Text>
+                <Card.Text>
+                  {item.Price}
+                </Card.Text>
+
+                <Button variant="primary">buss</Button>
+
+              </Card.Body>
+            </Card>
+           </div>
+              )
+            })
+          ):("")} 
+
+         
+
+
+        </div> */}
         <div class="col">
           <form action="" enctype="multipart/form-data">
             <h1 className="text-center">NFT
-
             </h1>
             {WalletConnected ? (
               <>
@@ -412,8 +516,34 @@ export default function Home() {
             Create
           </button>
         </div>
-        <div class="col"></div>
+        <div class="col">
+          <h1>User NFTs</h1>
+          {userNFTS.length>0?(
+            userNFTS.map((item,i)=>{
+              return(
+                <div>
+                <Card style={{ width: '11rem' }}>
+              <Card.Img variant="top" src={item.Image} />
+              <Card.Body>
+                <Card.Title>{item.Name}</Card.Title>
+                <Card.Text>
+                  {item.Description}
+                </Card.Text>
+                <Card.Text>
+                  {item.Price}
+                </Card.Text>
+                <Button onClick={()=>PutOnSale(item)} variant="primary">Put On Sale</Button>
+              </Card.Body>
+            </Card>
+           </div>
+              )
+            })
+          ):("")}
+        </div>
       </div>
+
+      
+
     </div>
   );
 }

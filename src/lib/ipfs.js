@@ -3,9 +3,9 @@ const  IPFS  =  require ( 'ipfs-api' );
 
 
 export const  IPFSfileAdd = async(data)=>{
-console.log("sssssdad",data)
 const file={path:'nftapp',content:data}
 const filesAdd=await ipfs.add(file)
+
 var ipfsimage = filesAdd[0].hash;
 return ipfsimage
 
